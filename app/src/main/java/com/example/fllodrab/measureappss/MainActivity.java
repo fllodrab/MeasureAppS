@@ -12,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.Toast;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -38,6 +39,16 @@ public class MainActivity extends AppCompatActivity {
 
                 String username = usernameWrapper.getEditText().getText().toString();
                 String password = usernameWrapper.getEditText().getText().toString();
+
+                if (!validateEmail(username)) {
+                    usernameWrapper.setError("Not a valid email address!");
+                } else if (!validatePassword(password)) {
+                    passwordWrapper.setError("Not a valid password!");
+                } else {
+                    usernameWrapper.setErrorEnabled(false);
+                    passwordWrapper.setErrorEnabled(false);
+                    doLogin();
+                }
 
                 //TODO: Login
             }
@@ -74,5 +85,13 @@ public class MainActivity extends AppCompatActivity {
      */
     public boolean validatePassword(String password) {
         return password.length() > 5;
+    }
+
+    /**
+     * Hacer Login del usuario.
+     */
+    public void doLogin() {
+        Toast.makeText(getApplicationContext(), "OK! I'm performing login.", Toast.LENGTH_SHORT).show();
+        // TODO: login procedure; not within the scope of this tutorial.
     }
 }
