@@ -27,7 +27,7 @@ public class BDSQLiteHelper extends SQLiteOpenHelper {
         ArrayList<Usuarios> usuarios = new ArrayList<Usuarios>();
 
         //Recuperar todos los registros para no perder los datos
-        Cursor c = db.rawQuery(" SELECT id, nick, nombre, apellidos, fecha_alta FROM Usuarios", null);
+        Cursor c = db.rawQuery("SELECT id, nick, nombre, apellidos, fecha_alta FROM Usuarios", null);
         if (c.moveToFirst()) {
             do {
                 Usuarios u = new Usuarios(c.getInt(0), c.getString(1), c.getString(2), c.getString(3));

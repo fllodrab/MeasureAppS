@@ -2,14 +2,10 @@ package com.example.fllodrab.measureappss;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.Toast;
@@ -17,7 +13,7 @@ import android.widget.Toast;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class MainActivity extends AppCompatActivity {
+public class SignUpActivity extends AppCompatActivity {
     private static final String EMAIL_PATTERN = "^[a-zA-Z0-9#_~!$&'()*+,;=:.\"(),:;<>@\\[\\]\\\\]+@[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*$";
     private Pattern pattern = Pattern.compile(EMAIL_PATTERN);
     private Matcher matcher;
@@ -25,13 +21,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_signup);
         final TextInputLayout usernameWrapper = (TextInputLayout) findViewById(R.id.usernameWrapper);
         final TextInputLayout passwordWrapper = (TextInputLayout) findViewById(R.id.passwordWrapper);
         usernameWrapper.setHint("Nombre de Usuario");
         passwordWrapper.setHint("Contraseña");
 
-        Button btn = (Button) findViewById(R.id.btn);
+        Button btn = (Button) findViewById(R.id.btn_login);
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -41,8 +37,10 @@ public class MainActivity extends AppCompatActivity {
                 String password = usernameWrapper.getEditText().getText().toString();
 
                 if (!validateEmail(username)) {
+                    Log.d("Entra username", username);
                     usernameWrapper.setError("Not a valid email address!");
                 } else if (!validatePassword(password)) {
+                    Log.d("Entra Password", password);
                     passwordWrapper.setError("Not a valid password!");
                 } else {
                     usernameWrapper.setErrorEnabled(false);

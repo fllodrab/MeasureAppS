@@ -1,7 +1,6 @@
 package com.example.fllodrab.measureappss;
 
 import java.util.Date;
-import java.util.StringTokenizer;
 
 /**
  * Created by FllodraB.
