@@ -1,95 +1,67 @@
 package com.example.fllodrab.measureappss;
 
-import android.content.Context;
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.TextInputLayout;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.squareup.okhttp.Callback;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 
-public class SignUpActivity extends AppCompatActivity {
-    private static final String EMAIL_PATTERN = "^[a-zA-Z0-9#_~!$&'()*+,;=:.\"(),:;<>@\\[\\]\\\\]+@[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*$";
-    private Pattern pattern = Pattern.compile(EMAIL_PATTERN);
-    private Matcher matcher;
+import java.io.IOException;
+
+public class SignUpActivity extends Activity {
+
+    NetworkHelper networkHelper = new NetworkHelper();
+
+    EditText nameInput;
+    EditText passwordInput;
+    EditText confirmPasswordInput;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_signup);
-        final TextInputLayout usernameWrapper = (TextInputLayout) findViewById(R.id.usernameWrapper);
-        final TextInputLayout passwordWrapper = (TextInputLayout) findViewById(R.id.passwordWrapper);
-        usernameWrapper.setHint("Nombre de Usuario");
-        passwordWrapper.setHint("Contraseña");
+        setContentView(R.layout.activity_sign_up);
+        nameInput = (EditText) findViewById(R.id.nameInput);
+        passwordInput = (EditText) findViewById(R.id.passwordInput);
+        confirmPasswordInput = (EditText) findViewById(R.id.confirmPasswordInput);
+    }
 
-        Button btn = (Button) findViewById(R.id.btn_login);
-        btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                hideKeyboard();
-
-                String username = usernameWrapper.getEditText().getText().toString();
-                String password = usernameWrapper.getEditText().getText().toString();
-
-                if (!validateEmail(username)) {
-                    Log.d("Entra username", username);
-                    usernameWrapper.setError("Not a valid email address!");
-                } else if (!validatePassword(password)) {
-                    Log.d("Entra Password", password);
-                    passwordWrapper.setError("Not a valid password!");
-                } else {
-                    usernameWrapper.setErrorEnabled(false);
-                    passwordWrapper.setErrorEnabled(false);
-                    doLogin();
+    public void signup(View view) {
+        Log.d("LOG", "llega");
+        if (!passwordInput.getText().toString().equals(confirmPasswordInput.getText().toString())) {
+            Log.d("Entra IF", "SI IF");
+            Toast.makeText(getApplicationContext(), "The passwords do not match", Toast.LENGTH_LONG).show();
+        } else {
+            Log.d("Entra ELSE", "SI ELSE");
+            String json = "{\"name\": \"" + nameInput.getText() + "\", \"password\":\"" + passwordInput.getText() + "\"}";
+            networkHelper.post("http://10.0.3.2:8000/signup", json, new Callback() {
+                @Override
+                public void onFailure(Request request, IOException e) {
                 }
-
-                //TODO: Login
-            }
-        });
-    }
-
-    /**
-     * Ocultar teclado cuando sea necesario.
-     */
-    private void hideKeyboard() {
-        View view = getCurrentFocus();
-        if (view != null) {
-            ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE)).
-                    hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                @Override
+                public void onResponse(Response response) throws IOException {
+                    String responseStr = response.body().string();
+                    final String messageText = "Status code : " + response.code() +
+                            "\n" +
+                            "Response body : " + responseStr;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), messageText, Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+            });
         }
-    }
-
-    /**
-     * Validar e-mail.
-     *
-     * @param email e-mail a validar.
-     * @return True si se valida correctamente. False en caso contrario.
-     */
-    public boolean validateEmail(String email) {
-        matcher = pattern.matcher(email);
-        return matcher.matches();
-    }
-
-    /**
-     * Validar contraseña.
-     *
-     * @param password Contraseña a validar.
-     * @return True si se ha validado correctamente. False en caso contrario.
-     */
-    public boolean validatePassword(String password) {
-        return password.length() > 5;
-    }
-
-    /**
-     * Hacer Login del usuario.
-     */
-    public void doLogin() {
-        Toast.makeText(getApplicationContext(), "OK! I'm performing login.", Toast.LENGTH_SHORT).show();
-        // TODO: login procedure; not within the scope of this tutorial.
+        Log.d("Sale", "sale");
     }
 }
