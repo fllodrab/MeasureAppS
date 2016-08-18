@@ -12,7 +12,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,6 +20,7 @@ import android.widget.EditText;
 import com.stormpath.sdk.Stormpath;
 import com.stormpath.sdk.StormpathCallback;
 import com.stormpath.sdk.models.StormpathError;
+import com.stormpath.sdk.models.UserProfile;
 import com.stormpath.sdk.ui.StormpathLoginActivity;
 import com.stormpath.sdk.utils.StringUtils;
 
@@ -40,11 +40,12 @@ import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 
 public class MainActivity extends AppCompatActivity {
+
     EditText mNote;
     Context context;
     private OkHttpClient okHttpClient;
-    public static final String ACTION_GET_NOTES = "Notes.get";
-    public static final String ACTION_POST_NOTES = "Notes.post";
+    public static final String ACTION_GET_NOTES = "notes.get";
+    public static final String ACTION_POST_NOTES = "notes.post";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,8 +56,18 @@ public class MainActivity extends AppCompatActivity {
 
         context = this;
 
-        //initialize OkHttp library
+        // Initialize OkHttp library.
+        HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
+            @Override
+            public void log(String message) {
+                Stormpath.logger().d(message);
+            }
+        });
 
+        httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        this.okHttpClient = new OkHttpClient.Builder()
+                .addNetworkInterceptor(httpLoggingInterceptor)
+                .build();
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -89,32 +100,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        Stormpath.getUserProfile(new StormpathCallback() {
-            @Override
-            public void onSuccess(Object o) {
 
-            }
-
-            @Override public void onFailure(StormpathError error) {
-// Show login view again.
-                Stormpath.logout();
-                startActivity(new Intent(context, StormpathLoginActivity.class));
-            }
-        });
-
-
-        // Initialize OkHttp library.
-        HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
-            @Override
-            public void log(String message) {
-                Stormpath.logger().d(message);
-            }
-        });
-
-        httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-        this.okHttpClient = new OkHttpClient.Builder()
-                .addNetworkInterceptor(httpLoggingInterceptor)
-                .build();
 
     }
 
@@ -122,20 +108,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onResume(){
         super.onResume();
-        startActivity(new Intent(this, StormpathLoginActivity.class));
-
-
-        // If not logged in, show stormpath activity.
-        if (Stormpath.accessToken() == null) {
-            Log.d("ACCESS TOKEN","accessToken() == NULL");
-
-            startActivity(new Intent(this, StormpathLoginActivity.class));
-        } else {
-            Log.d("BEFORE GET NOTES", Stormpath.accessToken());
-
-            getNotes();
-        }
-
 
         IntentFilter noteGetFilter = new IntentFilter(ACTION_GET_NOTES);
         IntentFilter notePostFilter = new IntentFilter(ACTION_POST_NOTES);
@@ -143,7 +115,18 @@ public class MainActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(onNoteReceived, noteGetFilter);
         LocalBroadcastManager.getInstance(this).registerReceiver(onNoteReceived, notePostFilter);
 
+        Stormpath.getUserProfile(new StormpathCallback<UserProfile>() {
+            @Override
+            public void onSuccess(UserProfile userProfile) {
+                getNotes();
+            }
 
+            @Override
+            public void onFailure(StormpathError error) {
+                // Show login view
+                startActivity(new Intent(context, StormpathLoginActivity.class));
+            }
+        });
     }
 
     @Override
@@ -168,7 +151,9 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_logout) {
+
             mNote.setText(""); //clears edit text, could alternatively save to shared preferences
+
             Stormpath.logout();
             startActivity(new Intent(context, StormpathLoginActivity.class));
 
@@ -184,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
 
             if(intent.getAction().contentEquals(ACTION_GET_NOTES))
-                mNote.setText(intent.getExtras().getString("Notes"));
+                mNote.setText(intent.getExtras().getString("notes"));
             else if(intent.getAction().contentEquals(ACTION_POST_NOTES))
                 Snackbar.make(mNote, getString(R.string.saved), Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
@@ -223,8 +208,6 @@ public class MainActivity extends AppCompatActivity {
                 .get()
                 .build();
 
-        Log.d("NOTAS IN", String.valueOf(request));
-
         okHttpClient.newCall(request).enqueue(new Callback() {
             @Override public
             void onFailure(Call call, IOException e) {
@@ -238,13 +221,10 @@ public class MainActivity extends AppCompatActivity {
                     mNotes = new JSONObject(response.body().string());
                     String noteCloud = mNotes.getString("notes");
 
-                    Log.d("NOTAS CONTENT+++++++++", noteCloud);
-
-// You can also include some extra data.
+                    // You can also include some extra data.
                     Intent intent = new Intent(ACTION_GET_NOTES);
                     intent.putExtra("notes", noteCloud);
 
-                    Log.d("CONTEXT", String.valueOf(context));
                     LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                 } catch (JSONException e) {
                 }
@@ -262,6 +242,4 @@ public class MainActivity extends AppCompatActivity {
 
         return builder.build();
     }
-
 }
-
