@@ -1,21 +1,29 @@
 package com.example.fllodrab.measureappss;
 
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.stormpath.sdk.Stormpath;
 import com.stormpath.sdk.StormpathCallback;
@@ -28,7 +36,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import io.github.luizgrp.sectionedrecyclerviewadapter.SectionedRecyclerViewAdapter;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;
@@ -77,7 +90,8 @@ public class MainActivity extends AppCompatActivity {
                 Snackbar.make(view, getString(R.string.saving), Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
 
-                saveNote();
+                //saveNote();
+
             }
         });
 
@@ -98,15 +112,12 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
-
-
-
+        mNote.setVisibility(View.GONE);
     }
 
 
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
 
         IntentFilter noteGetFilter = new IntentFilter(ACTION_GET_NOTES);
@@ -119,6 +130,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess(UserProfile userProfile) {
                 getNotes();
+                listOfRunningApps();
             }
 
             @Override
@@ -168,12 +180,17 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            if(intent.getAction().contentEquals(ACTION_GET_NOTES))
+            if (intent.getAction().contentEquals(ACTION_GET_NOTES)) {
                 mNote.setText(intent.getExtras().getString("notes"));
-            else if(intent.getAction().contentEquals(ACTION_POST_NOTES))
+                try {
+                    showSessionLastSession(intent);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            } else if (intent.getAction().contentEquals(ACTION_POST_NOTES)) {
                 Snackbar.make(mNote, getString(R.string.saved), Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
-
+            }
         }
     };
 
@@ -189,11 +206,12 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
         okHttpClient.newCall(request).enqueue(new Callback() {
-            @Override public
-            void onFailure(Call call, IOException e) {
+            @Override
+            public void onFailure(Call call, IOException e) {
             }
 
-            @Override public void onResponse(Call call, Response response)
+            @Override
+            public void onResponse(Call call, Response response)
                     throws IOException {
                 Intent intent = new Intent(ACTION_POST_NOTES);
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
@@ -209,11 +227,12 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
         okHttpClient.newCall(request).enqueue(new Callback() {
-            @Override public
-            void onFailure(Call call, IOException e) {
+            @Override
+            public void onFailure(Call call, IOException e) {
             }
 
-            @Override public void onResponse(Call call, Response response)
+            @Override
+            public void onResponse(Call call, Response response)
                     throws IOException {
                 JSONObject mNotes;
 
@@ -241,5 +260,61 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return builder.build();
+    }
+
+    /**
+     * Función que muestra las aplicaciones que hay en ejecución en el dispositivo.
+     * Function that shows up those apps that are running on the device.
+     */
+    private void listOfRunningApps() {
+        ActivityManager activityManager = (ActivityManager) this.getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningAppProcessInfo> pidsTask = activityManager.getRunningAppProcesses();
+
+        for (int i = 0; i < pidsTask.size(); i++) {
+            //nameList.add(pidsTask.get(i).processName);
+            Log.d("PIDTASKNAME: ", pidsTask.get(i).processName);
+            //idList.add(pidsTask.get(i).pid);
+            //uidList.add(pidsTask.get(i).uid);
+            try {
+                ApplicationInfo app = this.getPackageManager().getApplicationInfo(pidsTask.get(i).processName, 0);
+
+                Drawable icon = this.getPackageManager().getApplicationIcon(app);
+                Map application = new HashMap();
+                application.put("name", (String) this.getPackageManager().getApplicationLabel(app));
+                application.put("package", pidsTask.get(i).processName);
+                application.put("pid", pidsTask.get(i).pid);
+                application.put("uid", pidsTask.get(i).uid);
+                //nameList.add(application);
+            } catch (PackageManager.NameNotFoundException e) {
+                Toast toast = Toast.makeText(this, "error in getting icon", Toast.LENGTH_SHORT);
+                //toast.show();
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void showSessionLastSession(Intent intent) throws JSONException {
+        JSONObject jsonNotes = new JSONObject(intent.getStringExtra("notes"));
+
+        // Create an instance of SectionedRecyclerViewAdapter
+        SectionedRecyclerViewAdapter sectionAdapter = new SectionedRecyclerViewAdapter();
+
+        //EXAMPLE
+        List<String> messages = Arrays.asList(jsonNotes.getString("rankingTitle"), jsonNotes.getString("app1"), jsonNotes.getString("app2"), jsonNotes.getString("app3"), jsonNotes.getString("app4"));
+
+        // Create your sections with the list of data you got from your API
+        MySection data1Section = new MySection("Última Comparación", messages);
+
+        // Add your Sections
+        sectionAdapter.addSection(data1Section);
+
+        // Set up your RecyclerView with the SectionedRecyclerViewAdapter
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.sessionList);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setAdapter(sectionAdapter);
+    }
+
+    public Context getContext() {
+        return context;
     }
 }
