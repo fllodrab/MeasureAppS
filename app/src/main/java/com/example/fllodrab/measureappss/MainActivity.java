@@ -87,9 +87,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                Snackbar.make(view, getString(R.string.saving), Snackbar.LENGTH_LONG)
+                Snackbar.make(view, getString(R.string.loading_apps), Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
-
+                Intent intent = new Intent(MainActivity.this, NewComparison.class);
+                startActivity(intent);
                 //saveNote();
 
             }
@@ -130,7 +131,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess(UserProfile userProfile) {
                 getNotes();
-                listOfRunningApps();
             }
 
             @Override
@@ -260,37 +260,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return builder.build();
-    }
-
-    /**
-     * Función que muestra las aplicaciones que hay en ejecución en el dispositivo.
-     * Function that shows up those apps that are running on the device.
-     */
-    private void listOfRunningApps() {
-        ActivityManager activityManager = (ActivityManager) this.getSystemService(Context.ACTIVITY_SERVICE);
-        List<ActivityManager.RunningAppProcessInfo> pidsTask = activityManager.getRunningAppProcesses();
-
-        for (int i = 0; i < pidsTask.size(); i++) {
-            //nameList.add(pidsTask.get(i).processName);
-            Log.d("PIDTASKNAME: ", pidsTask.get(i).processName);
-            //idList.add(pidsTask.get(i).pid);
-            //uidList.add(pidsTask.get(i).uid);
-            try {
-                ApplicationInfo app = this.getPackageManager().getApplicationInfo(pidsTask.get(i).processName, 0);
-
-                Drawable icon = this.getPackageManager().getApplicationIcon(app);
-                Map application = new HashMap();
-                application.put("name", (String) this.getPackageManager().getApplicationLabel(app));
-                application.put("package", pidsTask.get(i).processName);
-                application.put("pid", pidsTask.get(i).pid);
-                application.put("uid", pidsTask.get(i).uid);
-                //nameList.add(application);
-            } catch (PackageManager.NameNotFoundException e) {
-                Toast toast = Toast.makeText(this, "error in getting icon", Toast.LENGTH_SHORT);
-                //toast.show();
-                e.printStackTrace();
-            }
-        }
     }
 
     private void showSessionLastSession(Intent intent) throws JSONException {
