@@ -1,21 +1,34 @@
 package com.example.fllodrab.measureappss;
 
 import android.app.Application;
+import android.graphics.drawable.Drawable;
+import android.widget.ImageView;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 /**
  * Created by FllodraB.
  * Clase para guardar un estado y que este no cambie durante la ejecución de la App (SINGLETON).
  */
 public class MyApp extends Application {
+    private String name = "";
     private double ram = 0.0;
     private double cpu = 0.0;
     private double upload = 0.0;
     private double download = 0.0;
     private double rating = 0.0;
+    private Drawable imgItem;
     private Map<String, MyApp> measures = new HashMap<String, MyApp>();
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public double getRam() {
         return ram;
@@ -63,5 +76,13 @@ public class MyApp extends Application {
 
     public void setMeasures(String name, MyApp obj) {
         measures.put(name, obj);
+    }
+
+    public Drawable getImgItem() {
+        return imgItem;
+    }
+
+    public void setImgItem(Drawable imgItem) {
+        this.imgItem = imgItem;
     }
 }

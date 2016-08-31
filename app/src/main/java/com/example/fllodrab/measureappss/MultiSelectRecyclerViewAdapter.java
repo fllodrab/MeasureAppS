@@ -1,12 +1,16 @@
 package com.example.fllodrab.measureappss;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by FllodraB
@@ -14,12 +18,12 @@ import java.util.ArrayList;
 
 public class MultiSelectRecyclerViewAdapter extends SelectableAdapter<MultiSelectRecyclerViewAdapter.ViewHolder> {
 
-    private ArrayList<String> mArrayList;
+    private List<MyApp> mArrayList;
     private Context mContext;
     private ViewHolder.ClickListener clickListener;
 
 
-    public MultiSelectRecyclerViewAdapter(Context context, ArrayList<String> arrayList, ViewHolder.ClickListener clickListener) {
+    public MultiSelectRecyclerViewAdapter(Context context, List<MyApp> arrayList, ViewHolder.ClickListener clickListener) {
         this.mArrayList = arrayList;
         this.mContext = context;
         this.clickListener = clickListener;
@@ -41,8 +45,12 @@ public class MultiSelectRecyclerViewAdapter extends SelectableAdapter<MultiSelec
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int position) {
+        Log.d("mArrayList", String.valueOf(mArrayList));
+        Log.d("position", String.valueOf(position));
+        Log.d("VIEW HOLDER", mArrayList.get(position).getName());
 
-        viewHolder.tvName.setText(mArrayList.get(position));
+        viewHolder.tvName.setText(mArrayList.get(position).getName());
+        viewHolder.imgItem.setImageDrawable(mArrayList.get(position).getImgItem());
 
         viewHolder.selectedOverlay.setVisibility(isSelected(position) ? View.VISIBLE : View.INVISIBLE);
 
@@ -56,6 +64,7 @@ public class MultiSelectRecyclerViewAdapter extends SelectableAdapter<MultiSelec
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 
         public TextView tvName;
+        public ImageView imgItem;
         private ClickListener listener;
         private final View selectedOverlay;
 
@@ -66,7 +75,8 @@ public class MultiSelectRecyclerViewAdapter extends SelectableAdapter<MultiSelec
             this.listener = listener;
 
             tvName = (TextView) itemLayoutView.findViewById(R.id.tvName);
-            selectedOverlay = (View) itemView.findViewById(R.id.selected_overlay);
+            imgItem = (ImageView) itemLayoutView.findViewById(R.id.imgItem);
+            selectedOverlay = itemView.findViewById(R.id.selected_overlay);
 
             itemLayoutView.setOnClickListener(this);
 
