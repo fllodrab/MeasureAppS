@@ -35,11 +35,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import io.github.luizgrp.sectionedrecyclerviewadapter.SectionedRecyclerViewAdapter;
 
@@ -62,6 +65,8 @@ public class NewComparison extends AppCompatActivity implements MultiSelectRecyc
     Long sentData;
     String nameOfApp = "";
     Drawable imageOfApp = null;
+    int pid = 0;
+    long startTime = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,8 +106,6 @@ public class NewComparison extends AppCompatActivity implements MultiSelectRecyc
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                Log.d("LIST OF RUNNING APPS", "BEGINS");
-
                 List<AndroidAppProcess> processes = AndroidProcesses.getRunningAppProcesses();
 
                 /** Tabla de las Aplicaciones que estan siendo ejecutadas y sus PIDs correspondientes */
@@ -126,12 +129,19 @@ public class NewComparison extends AppCompatActivity implements MultiSelectRecyc
                     } catch (PackageManager.NameNotFoundException e) {
                         e.printStackTrace();
                     }
+
+                    pid = processes.get(i).pid;
+                    try {
+                        startTime = processes.get(i).stat().starttime();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
                     oneAppObj.setName(nameOfApp);
                     oneAppObj.setImgItem(imageOfApp);
 
                     mArrayList.add(oneAppObj);
                 }
-
             }
         });
         thread.start();
@@ -148,12 +158,20 @@ public class NewComparison extends AppCompatActivity implements MultiSelectRecyc
             e.printStackTrace();
         }
 
+        /** Comprobamos que no haya procesos repetidos */
+        List<MyApp> resultList = new ArrayList<MyApp>();
+        Set<String> uniques = new HashSet<String>();
+
+        for (MyApp oneApp : mArrayList) {
+            if (uniques.add(oneApp.getName())) {
+                resultList.add(oneApp);
+            }
+        }
+
         mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new GridLayoutManager(this, 3));
-        Log.d("ARRAYLIST", String.valueOf(mArrayList));
-        mAdapter = new MultiSelectRecyclerViewAdapter(NewComparison.this, mArrayList, this);
-        Log.d("mADAPTER", String.valueOf(mAdapter));
+        mAdapter = new MultiSelectRecyclerViewAdapter(NewComparison.this, resultList, this);
         mRecyclerView.setAdapter(mAdapter);
     }
 

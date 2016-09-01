@@ -45,9 +45,6 @@ public class MultiSelectRecyclerViewAdapter extends SelectableAdapter<MultiSelec
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int position) {
-        Log.d("mArrayList", String.valueOf(mArrayList));
-        Log.d("position", String.valueOf(position));
-        Log.d("VIEW HOLDER", mArrayList.get(position).getName());
 
         viewHolder.tvName.setText(mArrayList.get(position).getName());
         viewHolder.imgItem.setImageDrawable(mArrayList.get(position).getImgItem());

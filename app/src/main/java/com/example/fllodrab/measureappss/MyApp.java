@@ -19,6 +19,9 @@ public class MyApp extends Application {
     private double upload = 0.0;
     private double download = 0.0;
     private double rating = 0.0;
+    private int pid = 0;
+
+    private long startTime = 0;
     private Drawable imgItem;
     private Map<String, MyApp> measures = new HashMap<String, MyApp>();
 
@@ -84,5 +87,21 @@ public class MyApp extends Application {
 
     public void setImgItem(Drawable imgItem) {
         this.imgItem = imgItem;
+    }
+
+    public long getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(long startTime) {
+        this.startTime = startTime;
+    }
+
+    public int getPid() {
+        return pid;
+    }
+
+    public void setPid(int pid) {
+        this.pid = pid;
     }
 }
