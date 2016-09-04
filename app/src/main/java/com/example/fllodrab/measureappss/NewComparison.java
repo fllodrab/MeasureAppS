@@ -2,6 +2,7 @@ package com.example.fllodrab.measureappss;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -21,6 +22,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -56,6 +58,8 @@ public class NewComparison extends AppCompatActivity implements MultiSelectRecyc
     private MultiSelectRecyclerViewAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private ArrayList<MyApp> mArrayList = new ArrayList<>();
+    private ArrayList<MyApp> evaluateList = new ArrayList<>();
+
 
     Context context;
     JSONArray runningAppList = new JSONArray();   //Array de objetos appObj
@@ -82,12 +86,21 @@ public class NewComparison extends AppCompatActivity implements MultiSelectRecyc
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                Snackbar.make(view, "Cargando los pesos...", Snackbar.LENGTH_LONG)
+                        .setCallback(new Snackbar.Callback() {
+                            @Override
+                            public void onDismissed(Snackbar snackbar, int event) {
+                                super.onDismissed(snackbar, event);
+                                evaluateSelectedItems(evaluateList);
+                                Intent intent = new Intent(NewComparison.this, Parameters.class);
+                                startActivity(intent);
+                            }
+                        }).show();
+
+
             }
         });
 
-        //listOfRunningApps();
         try {
             showAllRunningApps();
         } catch (PackageManager.NameNotFoundException e) {
@@ -168,6 +181,8 @@ public class NewComparison extends AppCompatActivity implements MultiSelectRecyc
             }
         }
 
+        evaluateList.addAll(resultList);
+
         mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new GridLayoutManager(this, 3));
@@ -175,42 +190,13 @@ public class NewComparison extends AppCompatActivity implements MultiSelectRecyc
         mRecyclerView.setAdapter(mAdapter);
     }
 
+    public void evaluateSelectedItems(List<MyApp> resultList) {
+        int elementSelected;
 
-    /**
-     * Función que elimina un objeto de un array JSON de objetos JSON
-     *
-     * @param idx  Posición
-     * @param from ArrayJSON
-     * @return Nuevo array
-     */
-    public static JSONArray remove(final int idx, final JSONArray from) {
-        final List<JSONObject> objs = asList(from);
-        objs.remove(idx);
-
-        final JSONArray ja = new JSONArray();
-        for (final JSONObject obj : objs) {
-            ja.put(obj);
+        for (int i = 0; i < mAdapter.getSelectedItems().size(); i++) {
+            elementSelected = mAdapter.getSelectedItems().get(i);
+            ((MyAppList) this.getApplication()).setMeasures(resultList.get(elementSelected));
         }
-
-        return ja;
-    }
-
-    /**
-     * Cambia JSONarray por un ArrayList
-     *
-     * @param ja JSONArray
-     * @return ArrayList
-     */
-    public static List<JSONObject> asList(final JSONArray ja) {
-        final int len = ja.length();
-        final ArrayList<JSONObject> result = new ArrayList<JSONObject>(len);
-        for (int i = 0; i < len; i++) {
-            final JSONObject obj = ja.optJSONObject(i);
-            if (obj != null) {
-                result.add(obj);
-            }
-        }
-        return result;
     }
 
     public Context getContext() {

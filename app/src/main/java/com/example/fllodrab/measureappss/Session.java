@@ -100,7 +100,7 @@ public class Session extends Fragment {
             String name = list.get(position);
 
             itemHolder.tvItem.setText(name);
-            itemHolder.imgItem.setImageResource(name.hashCode() % 2 == 0 ? R.drawable.ic_face_black_48dp : R.drawable.ic_tag_faces_black_48dp);
+            itemHolder.imgItem.setImageResource(name.hashCode() % 2 == 0 ? R.mipmap.ic_launcher : R.mipmap.logochip);
 
             itemHolder.rootView.setOnClickListener(new View.OnClickListener() {
                 @Override

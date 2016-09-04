@@ -29,4 +29,5 @@ dependencies {
     compile "com.android.support:recyclerview-v7:+"
     compile 'io.github.luizgrp.sectionedrecyclerviewadapter:sectionedrecyclerviewadapter:1.0.4'
     compile 'com.jaredrummler:android-processes:1.0.8'
+    compile 'org.adw.library:discrete-seekbar:1.0.1'
 }

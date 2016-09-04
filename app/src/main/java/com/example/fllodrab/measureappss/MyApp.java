@@ -10,9 +10,8 @@ import java.util.StringTokenizer;
 
 /**
  * Created by FllodraB.
- * Clase para guardar un estado y que este no cambie durante la ejecución de la App (SINGLETON).
  */
-public class MyApp extends Application {
+public class MyApp {
     private String name = "";
     private double ram = 0.0;
     private double cpu = 0.0;
@@ -23,7 +22,6 @@ public class MyApp extends Application {
 
     private long startTime = 0;
     private Drawable imgItem;
-    private Map<String, MyApp> measures = new HashMap<String, MyApp>();
 
     public String getName() {
         return name;
@@ -71,14 +69,6 @@ public class MyApp extends Application {
 
     public void setRating(double rating) {
         this.rating = rating;
-    }
-
-    public Map getMeasures() {
-        return measures;
-    }
-
-    public void setMeasures(String name, MyApp obj) {
-        measures.put(name, obj);
     }
 
     public Drawable getImgItem() {

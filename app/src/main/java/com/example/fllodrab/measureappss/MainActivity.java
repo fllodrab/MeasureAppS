@@ -88,9 +88,14 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
 
                 Snackbar.make(view, getString(R.string.loading_apps), Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-                Intent intent = new Intent(MainActivity.this, NewComparison.class);
-                startActivity(intent);
+                        .setCallback(new Snackbar.Callback() {
+                            @Override
+                            public void onDismissed(Snackbar snackbar, int event) {
+                                super.onDismissed(snackbar, event);
+                                Intent intent = new Intent(MainActivity.this, NewComparison.class);
+                                startActivity(intent);
+                            }
+                        }).show();
                 //saveNote();
 
             }
