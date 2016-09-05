@@ -15,8 +15,8 @@ public class MyApp {
     private String name = "";
     private double ram = 0.0;
     private double cpu = 0.0;
-    private double upload = 0.0;
-    private double download = 0.0;
+    private long upload = 0;
+    private long download = 0;
     private double rating = 0.0;
     private int pid = 0;
 
@@ -47,19 +47,19 @@ public class MyApp {
         this.cpu = cpu;
     }
 
-    public double getUpload() {
+    public long getUpload() {
         return upload;
     }
 
-    public void setUpload(double upload) {
+    public void setUpload(long upload) {
         this.upload = upload;
     }
 
-    public double getDownload() {
+    public long getDownload() {
         return download;
     }
 
-    public void setDownload(double download) {
+    public void setDownload(long download) {
         this.download = download;
     }
 

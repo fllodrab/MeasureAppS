@@ -61,34 +61,23 @@ public class Tools {
 
             RandomAccessFile readerCPUproc = new RandomAccessFile("proc/"+ pid +"/stat", "r");
             String loadCPUproc = readerCPUproc.readLine();
-            //Log.d("FILE with the stats: ", loadCPUproc);
             String[] columnsCPUproc = loadCPUproc.split(" +");
-
             long utimeCPUproc = Long.parseLong(columnsCPUproc[13]); //utime - CPU time spent in user code, measured in clock ticks
-            //Log.d("utime", String.valueOf(utimeCPUproc));
             long stimeCPUproc = Long.parseLong(columnsCPUproc[14]);   //CPU time spent in kernel code, measured in clock ticks
-            //Log.d("stime", String.valueOf(stimeCPUproc));
             long cutimeCPUproc = Long.parseLong(columnsCPUproc[17]);   //Waited-for children's CPU time spent in user code (in clock ticks)
             long cstimeCPUproc = Long.parseLong(columnsCPUproc[16]);   //Waited-for children's CPU time spent in kernel code (in clock ticks)
             long starttimeCPUproc = Long.parseLong(columnsCPUproc[21]);    //Time when the process started, measured in clock ticks
             //RandomAccessFile hertzReader = new RandomAccessFile("/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq", "r");
             //String loadHertz = hertzReader.readLine();
             long hertz = 100; //Long.parseLong(loadHertz); //Number of clock ticks (HERTZ), under assumption of an unmodified Android system
-            //Log.d("Hertz", String.valueOf(hertz));
             long totalTime = utimeCPUproc + stimeCPUproc;   //Tiempo total de uso de la CPU por el proceso
             //totalTime = totalTime + cutimeCPUproc + cstimeCPUproc;  //Añadimos al total el tiempo de uso de CPU de los procesos hijo del proceso analizado
             RandomAccessFile uptimeReader = new RandomAccessFile("proc/uptime", "r");
             String loadUptime = uptimeReader.readLine();
-            //Log.d("uptime FILE: ", loadUptime);
             String[] valuesUptimeReader = loadUptime.split(" +");
             double uptime = Double.parseDouble(valuesUptimeReader[0]);   //The uptime of the system (seconds)
-            //Log.d("UPTIME", String.valueOf(uptime));
-            //Log.d("STARTTIME", String.valueOf(starttimeCPUproc));
-            //Log.d("TOTALTIME", String.valueOf(totalTime));
             double seconds = (uptime - (starttimeCPUproc / hertz)); //Total elapsed time in seconds since the process started
             double cpu_usage = 100 * ((totalTime / hertz) / seconds); //Total CPU usage in percentage
-            //Log.d("SECONDS", String.valueOf(seconds));
-            //Log.d("CPU_USAGE", String.valueOf(cpu_usage));
             return cpu_usage;
 
         } catch (IOException e) {
@@ -96,6 +85,11 @@ public class Tools {
         }
 
         return 7;
+    }
+
+    public double getTOPSIS() {
+
+        return 7.0;
     }
 
 }

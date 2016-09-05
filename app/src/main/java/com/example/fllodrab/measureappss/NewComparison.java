@@ -3,12 +3,8 @@ package com.example.fllodrab.measureappss;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
-import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
 import android.net.TrafficStats;
 import android.os.Bundle;
 import android.os.Debug;
@@ -16,37 +12,18 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.CompoundButton;
-import android.widget.TableLayout;
-import android.widget.TableRow;
-import android.widget.TextView;
-import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import com.jaredrummler.android.processes.AndroidProcesses;
 import com.jaredrummler.android.processes.models.AndroidAppProcess;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-
-import io.github.luizgrp.sectionedrecyclerviewadapter.SectionedRecyclerViewAdapter;
 
 import static java.lang.Integer.parseInt;
 
@@ -56,21 +33,21 @@ public class NewComparison extends AppCompatActivity implements MultiSelectRecyc
 
     public RecyclerView mRecyclerView;
     private MultiSelectRecyclerViewAdapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
     private ArrayList<MyApp> mArrayList = new ArrayList<>();
     private ArrayList<MyApp> evaluateList = new ArrayList<>();
 
-
     Context context;
-    JSONArray runningAppList = new JSONArray();   //Array de objetos appObj
-    Boolean repeated = false;
-    Tools tool = new Tools();
-    Long receivedData;
-    Long sentData;
+    Tools toolForApps = new Tools();
     String nameOfApp = "";
     Drawable imageOfApp = null;
+    double cpuUsage;
+    double ramUsage;
+    long uploadData;
+    long downloadData;
+    double rating;
+    double marketDownloads;
     int pid = 0;
-    long startTime = 0;
+    int uid = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +56,9 @@ public class NewComparison extends AppCompatActivity implements MultiSelectRecyc
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        final ActivityManager activityManager = (ActivityManager) this.getSystemService(Context.ACTIVITY_SERVICE);
+        ActivityManager activityManager = (ActivityManager) this.getSystemService(Context.ACTIVITY_SERVICE);
+        long[] send = {0};
+        long[] received = {0};
         context = this;
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -102,7 +81,7 @@ public class NewComparison extends AppCompatActivity implements MultiSelectRecyc
         });
 
         try {
-            showAllRunningApps();
+            showAllRunningApps(activityManager, send, received);
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
@@ -113,16 +92,13 @@ public class NewComparison extends AppCompatActivity implements MultiSelectRecyc
      *
      * @throws PackageManager.NameNotFoundException
      */
-    private void showAllRunningApps() throws PackageManager.NameNotFoundException {
+    private void showAllRunningApps(final ActivityManager activityManager, final long[] send, final long[] received) throws PackageManager.NameNotFoundException {
         final PackageManager pm = this.getPackageManager();
 
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 List<AndroidAppProcess> processes = AndroidProcesses.getRunningAppProcesses();
-
-                /** Tabla de las Aplicaciones que estan siendo ejecutadas y sus PIDs correspondientes */
-                List<Map> nameList = new ArrayList<>();
 
                 for (int i = 0; i < processes.size(); i++) {
                     MyApp oneAppObj = new MyApp();
@@ -144,14 +120,30 @@ public class NewComparison extends AppCompatActivity implements MultiSelectRecyc
                     }
 
                     pid = processes.get(i).pid;
-                    try {
-                        startTime = processes.get(i).stat().starttime();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    uid = processes.get(i).uid;
+                    cpuUsage = toolForApps.readCPUusagePerProcess(pid);
+                    Debug.MemoryInfo[] memory = activityManager.getProcessMemoryInfo(new int[]{pid});
+                    ramUsage = memory[0].getTotalPss();
+                    //Obtenemos el tráfico de datos
+                    received[0] = TrafficStats.getUidRxBytes(Integer.parseInt(String.valueOf(uid)));  //Obtenemos la cantidad de datos recibidos
+                    send[0] = TrafficStats.getUidTxBytes(Integer.parseInt(String.valueOf(uid)));    //Obtenemos la cantidad de datos enviados
+                    if(received[0] == -1) {
+                        received[0] = 0;
+                    }
+                    if(send[0] == -1) {
+                        send[0] = 0;
                     }
 
+                    downloadData = received[0]/1024;
+                    uploadData = send[0]/1024;
+
+                    /** Rellenamos los objetos */
                     oneAppObj.setName(nameOfApp);
                     oneAppObj.setImgItem(imageOfApp);
+                    oneAppObj.setCpu(cpuUsage);
+                    oneAppObj.setRam(ramUsage);
+                    oneAppObj.setUpload(uploadData);
+                    oneAppObj.setDownload(downloadData);
 
                     mArrayList.add(oneAppObj);
                 }
