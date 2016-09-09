@@ -26,8 +26,11 @@ dependencies {
     compile 'com.android.support:design:23.2.0'
     compile 'com.stormpath.sdk:stormpath-sdk-android:1.1.2'
     compile 'com.stormpath.sdk:stormpath-sdk-android-ui:1.1.2'
-    compile "com.android.support:recyclerview-v7:+"
+    compile 'com.android.support:recyclerview-v7:+'
     compile 'io.github.luizgrp.sectionedrecyclerviewadapter:sectionedrecyclerviewadapter:1.0.4'
     compile 'com.jaredrummler:android-processes:1.0.8'
     compile 'org.adw.library:discrete-seekbar:1.0.1'
+    compile files('libs/protobuf-java-2.2.0.jar')
+    compile files('libs/androidmarketapi-0.6.jar')
+    compile 'de.halfreal.googleplayscraper:googleplayscraper-java:1.0.2'
 }

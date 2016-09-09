@@ -16,6 +16,7 @@ buildscript {
 allprojects {
     repositories {
         jcenter()
+        maven { url "https://raw.githubusercontent.com/joecks/google-play-scraper-java/master/release/" }
     }
 }
 

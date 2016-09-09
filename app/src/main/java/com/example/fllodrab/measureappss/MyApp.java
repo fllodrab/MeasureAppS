@@ -13,13 +13,14 @@ import java.util.StringTokenizer;
  */
 public class MyApp {
     private String name = "";
+    private String packageName = "";
     private double ram = 0.0;
     private double cpu = 0.0;
     private long upload = 0;
     private long download = 0;
     private double rating = 0.0;
+    private double numberOfDownloads = 0.0;
     private int pid = 0;
-
     private long startTime = 0;
     private Drawable imgItem;
 
@@ -29,6 +30,14 @@ public class MyApp {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getPackageName() {
+        return packageName;
+    }
+
+    public void setPackageName(String packageName) {
+        this.packageName = packageName;
     }
 
     public double getRam() {
@@ -69,6 +78,14 @@ public class MyApp {
 
     public void setRating(double rating) {
         this.rating = rating;
+    }
+
+    public double getNumberOfDownloads() {
+        return numberOfDownloads;
+    }
+
+    public void setNumberOfDownloads(double numberOfDownloads) {
+        this.numberOfDownloads = numberOfDownloads;
     }
 
     public Drawable getImgItem() {
